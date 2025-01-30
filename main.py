@@ -1,11 +1,34 @@
 import uvicorn
 import json
+import re
+import emoji
 
+from textblob import TextBlob
 from app_store_scraper import AppStore
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse, FileResponse
 
 app = FastAPI()
+
+
+def get_sentiment(text: str) -> str:
+    """Returns the sentiment of a given text."""
+    blob = TextBlob(text)
+    polarity = blob.sentiment.polarity
+    if polarity > 0.1:
+        return "Positive"
+    if polarity < -0.1:
+        return "Negative"
+    return "Neutral"
+
+
+def clean_text(text: str) -> str:
+    """Preprocesses text by removing special characters and extra spaces."""
+    text = emoji.replace_emoji(text, replace='')  # Remove emojis
+    text = text.replace("\n", " ")  # Remove new lines
+    text = text.replace("!.", "! ")
+    text = re.sub(r"\s+", " ", text).strip()  # Remove extra spaces
+    return text
 
 
 def fetch_reviews(app_name: str, app_id: str, country: str = "us", num_reviews: int = 100):
@@ -19,12 +42,17 @@ def fetch_reviews(app_name: str, app_id: str, country: str = "us", num_reviews: 
         processed_reviews = []
         for review in reviews:
             processed_reviews.append({
-                "title": review.get("title", "No title"),
+                "title": review.get("title", ""),
                 "rating": review.get("rating", "No rating"),
-                "text": review.get("review", "")
+                "review": review.get("review", "")
             })
 
+        for review in processed_reviews:
+            title_and_review = review["title"] + ". " + review["review"]
+            review["cleaned_text"] = clean_text(title_and_review)
+            review["sentiment"] = get_sentiment(review["cleaned_text"])
         return processed_reviews
+
     except Exception as e:
         return {"error": str(e)}
 
