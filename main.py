@@ -3,6 +3,8 @@ import json
 import re
 import emoji
 
+import pandas as pd
+
 from textblob import TextBlob
 from app_store_scraper import AppStore
 from fastapi import FastAPI
@@ -57,6 +59,16 @@ def fetch_reviews(app_name: str, app_id: str, country: str = "us", num_reviews: 
         return {"error": str(e)}
 
 
+def get_metrics(processed_reviews: list):
+    df = pd.DataFrame(processed_reviews, columns=["title", "rating", "review", "cleaned_text", "sentiment"])
+    mean_rating = df.rating.mean()
+    ratings_distribution_count = df.rating.value_counts()
+    ratings_distribution_percentage = df.rating.value_counts(normalize=True) * 100
+    return {"mean_rating": mean_rating,
+            "ratings_distribution": ratings_distribution_count.to_dict(),
+            "ratings_distribution_percentage": ratings_distribution_percentage.to_dict()}
+
+
 @app.get("/healthcheck")
 async def test():
     return JSONResponse(content={"message": "API is running!"})
@@ -65,7 +77,7 @@ async def test():
 @app.get("/get_reviews")
 async def get_reviews(app_name: str, app_id: str):
     reviews = fetch_reviews(app_name=app_name, app_id=app_id)
-    metrics = {}
+    metrics = get_metrics(reviews)
     return JSONResponse(content={"reviews": reviews, "metrics": metrics})
 
 
