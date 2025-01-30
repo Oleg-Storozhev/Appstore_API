@@ -10,7 +10,7 @@ app = FastAPI()
 
 def fetch_reviews(app_name: str, app_id: str, country: str = "us", num_reviews: int = 100):
     try:
-        app = AppStore(country='us', app_name=app_name, app_id=app_id)
+        app = AppStore(country=country, app_name=app_name, app_id=app_id)
         app.review(how_many=num_reviews)
         reviews = app.reviews
         if not reviews:
