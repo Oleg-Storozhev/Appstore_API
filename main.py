@@ -21,10 +21,8 @@ async def test():
 async def get_reviews(app_name: str, app_id: str):
     reviews = ReviewFetcher.fetch_reviews(app_name=app_name, app_id=app_id)
     metrics = MetricsCalculator.get_metrics(reviews)
-    # negative_keywords = KeywordExtractor.extract_negative_keywords(processed_reviews)
-    # improvement_suggestions = improvement_suggestions_summarizer.generate_insight(negative_keywords)
     negative_keywords = KeywordExtractor.extract_keywords_keybert(reviews)
-    improvement_suggestions = f"Improvement suggestions: {', '.join(negative_keywords)}"
+    improvement_suggestions = improvement_suggestions_summarizer.generate_insight(negative_keywords)
 
     return JSONResponse(content={"reviews": reviews, "metrics": metrics, "improvement_suggestions": improvement_suggestions})
 
