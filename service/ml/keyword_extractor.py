@@ -1,15 +1,14 @@
-from sklearn.feature_extraction.text import TfidfVectorizer
+from keybert import KeyBERT
 
 
 class KeywordExtractor:
     @staticmethod
-    def extract_negative_keywords(reviews):
-        """Identifies common keywords in negative reviews using TF-IDF."""
-        negative_reviews = [review['cleaned_text'] for review in reviews if review['sentiment'] == "Negative"]
+    def extract_keywords_keybert(reviews):
+        """Identifies common keywords in negative reviews using KeyBERT."""
+        negative_reviews = " ".join([review['cleaned_text'] for review in reviews if review['sentiment'] == "Negative"])
         if not negative_reviews:
             return []
 
-        vectorizer = TfidfVectorizer(stop_words='english', max_features=10, ngram_range=(2, 3))
-        X = vectorizer.fit_transform(negative_reviews)
-        keywords = vectorizer.get_feature_names_out()
-        return list(keywords)
+        kw_model = KeyBERT()
+        keywords = kw_model.extract_keywords(negative_reviews, keyphrase_ngram_range=(2, 7), use_mmr=True, diversity=0.35, top_n=30)
+        return [kw[0] for kw in keywords]
