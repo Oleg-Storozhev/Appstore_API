@@ -10,6 +10,27 @@ app_name = st.text_input("App Name:", placeholder="Enter the app name")
 app_id = st.text_input("App ID:", placeholder="Enter the app ID")
 
 
+def plot_pie_chart(data, title):
+    labels = list(data.keys())
+    sizes = list(data.values())
+    fig, ax = plt.subplots()
+    ax.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90)
+    ax.axis("equal")
+    plt.title(title)
+    st.pyplot(fig)
+
+
+def plot_bar_chart(data, title):
+    labels = list(data.keys())
+    sizes = list(data.values())
+    fig, ax = plt.subplots()
+    ax.bar(labels, sizes, color="skyblue")
+    plt.title(f"{title} Distribution")
+    plt.xlabel(title)
+    plt.ylabel("Count")
+    st.pyplot(fig)
+
+
 def call_api(endpoint, method="GET", data=None):
     url = f"{API_URL}{endpoint}"
     try:
@@ -53,22 +74,22 @@ if st.button("Get Review Metrics"):
             st.subheader("Ratings Distribution")
             ratings_distribution = metrics.get("ratings_distribution_count", {})
             if ratings_distribution:
-                fig, ax = plt.subplots()
-                ax.bar(ratings_distribution.keys(), ratings_distribution.values(), color="skyblue")
-                plt.title("Ratings Distribution")
-                plt.xlabel("Ratings")
-                plt.ylabel("Count")
-                st.pyplot(fig)
+                plot_bar_chart(ratings_distribution,"Ratings")
 
             st.subheader("Sentiment Distribution")
             sentiment_distribution = metrics.get("sentiment_distribution_count", {})
             if sentiment_distribution:
-                fig, ax = plt.subplots()
-                ax.bar(sentiment_distribution.keys(), sentiment_distribution.values(), color="lightgreen")
-                plt.title("Sentiment Distribution")
-                plt.xlabel("Sentiment")
-                plt.ylabel("Count")
-                st.pyplot(fig)
+                plot_bar_chart(sentiment_distribution,"Sentiment")
+
+            st.subheader("Ratings Distribution (Percentage)")
+            ratings_count_percentage = metrics.get("ratings_count_percentage", {})
+            if ratings_count_percentage:
+                plot_pie_chart(ratings_count_percentage, "Ratings Distribution")
+
+            st.subheader("Sentiment Distribution (Percentage)")
+            sentiment_count_percentage = metrics.get("sentiment_count_percentage", {})
+            if sentiment_count_percentage:
+                plot_pie_chart(sentiment_count_percentage, "Sentiment Distribution")
     else:
         st.error("Please provide both App Name and App ID.")
 
