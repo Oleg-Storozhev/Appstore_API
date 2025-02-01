@@ -14,3 +14,4 @@ langchain_community~=0.3.16
 langchain-huggingface~=0.1.2
 pymongo[srv]~=4.11
 psutil~=6.1.1
+pydantic~=2.10.3
