@@ -108,11 +108,12 @@ async def download_reviews(
         raise HTTPException(status_code=404, detail="Reviews not found in the database.")
 
     reviews_list = reviews["reviews"]
+    app_name = app_name.replace(" ", "_").replace("-", "_").lower()
     file_path = f"reviews/{app_name}.json"
     try:
         with open(file_path, "w") as f:
             json.dump(reviews_list, f)
-        
+
         return FileResponse(file_path, filename=f"{app_name}_reviews.json")
 
     except FileNotFoundError:
