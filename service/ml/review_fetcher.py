@@ -1,4 +1,5 @@
 from app_store_scraper import AppStore
+from fastapi import HTTPException
 
 from service.ml.sentiment_analyzer import SentimentAnalyzer
 from service.ml.text_preprocessor import TextPreprocessor
@@ -14,7 +15,7 @@ class ReviewFetcher:
             reviews = app.reviews
             if not reviews:
                 logger.error(f"No reviews found for app_name={app_name}, app_id={app_id}, country={country}.")
-                raise ValueError("No reviews found for the specified app.")
+                raise HTTPException(status_code=404, detail="Reviews not found in the database.")
 
             processed_reviews = []
             for review in reviews:
@@ -32,12 +33,10 @@ class ReviewFetcher:
             review_dict = {"app_id": app_id, "app_name": app_name, "reviews": processed_reviews}
             return review_dict
 
-        except ValueError as e:
-            logger.error(f"ValueError occurred: {e}")
-            raise e
         except ConnectionError as e:
             logger.error(f"ConnectionError while fetching reviews: {e}")
-            raise ConnectionError("Unable to connect to the App Store API. Please check your network connection.")
+            raise HTTPException(status_code=503, detail="Unable to connect to the App Store API. Please check your network connection.")
+
         except Exception as e:
-            logger.exception(f"Unexpected error while fetching reviews for app_name={app_name}, app_id={app_id}")
-            raise RuntimeError("Error while fetching reviews. Please try again later.")
+            logger.exception(f"Unexpected error while fetching reviews for app_name={app_name}, app_id={app_id}. Error:{e}")
+            raise Exception("Error while fetching reviews.")
