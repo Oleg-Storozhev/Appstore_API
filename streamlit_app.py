@@ -25,6 +25,7 @@ def plot_bar_chart(data, title):
     sizes = list(data.values())
     fig, ax = plt.subplots()
     ax.bar(labels, sizes, color="skyblue")
+    ax.grid(axis="y", linestyle="--", alpha=0.7)
     plt.title(f"{title} Distribution")
     plt.xlabel(title)
     plt.ylabel("Count")
