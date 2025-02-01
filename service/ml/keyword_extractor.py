@@ -4,7 +4,6 @@ from keybert import KeyBERT
 class KeywordExtractor:
     @staticmethod
     def extract_keywords_keybert(reviews):
-        """Identifies common keywords in negative reviews using KeyBERT."""
         negative_reviews = " ".join([review['cleaned_text'] for review in reviews if review['sentiment'] == "Negative"])
         if not negative_reviews:
             return []

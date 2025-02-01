@@ -38,7 +38,6 @@ class ImprovementSuggestionsSummarizer:
         self.suggestion_chain = self.suggestion_prompt | self.llm
 
     def generate_insight(self, keywords):
-        """Generates insights using Mistral Small based on extracted keywords."""
         if not keywords:
             return "No major concerns identified."
 
