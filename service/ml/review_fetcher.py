@@ -6,7 +6,7 @@ from service.ml.sentiment_analyzer import SentimentAnalyzer
 
 class ReviewFetcher:
     @staticmethod
-    def fetch_reviews(app_name: str, app_id: str, country: str = "us", num_reviews: int = 100):
+    def fetch_reviews(app_name: str, app_id: str, country: str = "us", num_reviews: int = 100) -> dict:
         try:
             app = AppStore(country=country, app_name=app_name, app_id=app_id)
             app.review(how_many=num_reviews)
@@ -26,7 +26,9 @@ class ReviewFetcher:
                 title_and_review = review["title"] + ". " + review["review"]
                 review["cleaned_text"] = TextPreprocessor.clean_text(title_and_review)
                 review["sentiment"] = SentimentAnalyzer.get_sentiment(review["cleaned_text"])
-            return processed_reviews
+
+            review_dict = {"app_id": app_id, "app_name": app_name, "reviews": processed_reviews}
+            return review_dict
 
         except Exception as e:
             return {"error": str(e)}
