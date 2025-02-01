@@ -1,8 +1,8 @@
 import json
-import uvicorn
 import traceback
 
-from fastapi import FastAPI, HTTPException
+import uvicorn
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.responses import JSONResponse, FileResponse
 
 from service.connectors.mongodb_connector import MongoConnector
@@ -14,13 +14,21 @@ mongodb_connector = MongoConnector()
 metric_inference = MetricInference()
 
 
+def validate_and_process_params(app_name: str, app_id: str):
+    if not app_name:
+        raise HTTPException(status_code=400, detail="The 'app_name' parameter is required.")
+    if not app_id:
+        raise HTTPException(status_code=400, detail="The 'app_id' parameter is required.")
+    return app_name.lower(), app_id
+
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc: Exception):
     return JSONResponse(
         status_code=500,
         content={"message": "Something went wrong",
                  "exception": traceback.format_exc(),
-        },
+                 },
     )
 
 
@@ -40,7 +48,9 @@ async def test():
 
 
 @app.post("/get_reviews")
-async def get_reviews(app_name: str, app_id: str):
+async def get_reviews(params: tuple = Depends(validate_and_process_params)):
+    app_name, app_id = params
+
     reviews = ReviewFetcher.fetch_reviews(app_name=app_name, app_id=app_id)
     mongodb_connector.add_or_update_data(reviews)
     return JSONResponse(status_code=200,
@@ -48,7 +58,9 @@ async def get_reviews(app_name: str, app_id: str):
 
 
 @app.get("/get_reviews_metrics")
-async def get_reviews_metrics(app_name: str, app_id: str):
+async def get_reviews_metrics(params: tuple = Depends(validate_and_process_params)):
+    app_name, app_id = params
+
     reviews = mongodb_connector.get_data(app_name=app_name, app_id=app_id)
 
     if not reviews or "reviews" not in reviews:
@@ -65,14 +77,16 @@ async def get_reviews_metrics(app_name: str, app_id: str):
 
 
 @app.get("/download_reviews")
-async def download_reviews(app_name: str, app_id: str):
-    try:
-        reviews = mongodb_connector.get_data(app_name=app_name, app_id=app_id)
-        if not reviews or "reviews" not in reviews:
-            raise HTTPException(status_code=404, detail="Reviews not found in the database.")
+async def download_reviews(params: tuple = Depends(validate_and_process_params)):
+    app_name, app_id = params
 
-        reviews_list = reviews["reviews"]
-        file_path = f"reviews/{app_name}.json"
+    reviews = mongodb_connector.get_data(app_name=app_name, app_id=app_id)
+    if not reviews or "reviews" not in reviews:
+        raise HTTPException(status_code=404, detail="Reviews not found in the database.")
+
+    reviews_list = reviews["reviews"]
+    file_path = f"reviews/{app_name}.json"
+    try:
         with open(file_path, "w") as f:
             json.dump(reviews_list, f)
 
