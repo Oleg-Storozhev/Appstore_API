@@ -1,8 +1,9 @@
 import json
 import traceback
-
 import uvicorn
-from fastapi import FastAPI, HTTPException, Depends
+
+from fastapi import Depends
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse, FileResponse
 
 from service.connectors.mongodb_connector import MongoConnector
@@ -10,8 +11,14 @@ from service.metric_inference import MetricInference
 from service.ml.review_fetcher import ReviewFetcher
 
 app = FastAPI()
-mongodb_connector = MongoConnector()
-metric_inference = MetricInference()
+
+
+def get_mongo_connector():
+    return MongoConnector()
+
+
+def get_metric_inference():
+    return MetricInference()
 
 
 def validate_and_process_params(app_name: str, app_id: str):
@@ -48,7 +55,9 @@ async def test():
 
 
 @app.post("/get_reviews")
-async def get_reviews(params: tuple = Depends(validate_and_process_params)):
+async def get_reviews(
+        params: tuple = Depends(validate_and_process_params),
+        mongodb_connector: MongoConnector = Depends(get_mongo_connector)):
     app_name, app_id = params
 
     reviews = ReviewFetcher.fetch_reviews(app_name=app_name, app_id=app_id)
@@ -58,7 +67,10 @@ async def get_reviews(params: tuple = Depends(validate_and_process_params)):
 
 
 @app.get("/get_reviews_metrics")
-async def get_reviews_metrics(params: tuple = Depends(validate_and_process_params)):
+async def get_reviews_metrics(
+        params: tuple = Depends(validate_and_process_params),
+        mongodb_connector: MongoConnector = Depends(get_mongo_connector),
+        metric_inference: MetricInference = Depends(get_metric_inference)):
     app_name, app_id = params
 
     reviews = mongodb_connector.get_data(app_name=app_name, app_id=app_id)
@@ -77,7 +89,9 @@ async def get_reviews_metrics(params: tuple = Depends(validate_and_process_param
 
 
 @app.get("/download_reviews")
-async def download_reviews(params: tuple = Depends(validate_and_process_params)):
+async def download_reviews(
+        params: tuple = Depends(validate_and_process_params),
+        mongodb_connector: MongoConnector = Depends(get_mongo_connector)):
     app_name, app_id = params
 
     reviews = mongodb_connector.get_data(app_name=app_name, app_id=app_id)
@@ -89,7 +103,7 @@ async def download_reviews(params: tuple = Depends(validate_and_process_params))
     try:
         with open(file_path, "w") as f:
             json.dump(reviews_list, f)
-
+        
         return FileResponse(file_path, filename=f"{app_name}_reviews.json")
 
     except FileNotFoundError:
