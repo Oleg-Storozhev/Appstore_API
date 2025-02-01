@@ -46,5 +46,4 @@ class ImprovementSuggestionsSummarizer:
         suggestion_result = re.sub(r"[^\S\r\n]+", " ", suggestion_result)
         suggestion_result = re.sub(r"\n+", "\n", suggestion_result)
         suggestion_result = suggestion_result.strip()
-        print(suggestion_result)
         return suggestion_result

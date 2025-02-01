@@ -4,14 +4,12 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse, FileResponse
 
 from service.connectors.mongodb_connector import MongoConnector
-from service.ml.improvement_suggestions_summarizer import ImprovementSuggestionsSummarizer
-from service.ml.metrics_calculator import MetricsCalculator
 from service.ml.review_fetcher import ReviewFetcher
-from service.ml.keyword_extractor import KeywordExtractor
+from service.metric_inference import MetricInference
 
 app = FastAPI()
-improvement_suggestions_summarizer = ImprovementSuggestionsSummarizer()
 mongodb_connector = MongoConnector()
+metric_inference = MetricInference()
 
 
 @app.get("/healthcheck")
@@ -32,13 +30,12 @@ async def get_reviews(app_name: str, app_id: str):
 async def get_reviews_metrics(app_name: str, app_id: str):
     reviews = mongodb_connector.get_data(app_name=app_name, app_id=app_id)
     reviews_list = reviews["reviews"]
-    metrics = MetricsCalculator.get_metrics(reviews_list)
-    negative_keywords = KeywordExtractor.extract_keywords_keybert(reviews_list)
-    improvement_suggestions = improvement_suggestions_summarizer.generate_insight(negative_keywords)
+    result = metric_inference.run(reviews_list)
+    metrics = result["metrics"]
+    improvement_suggestions = result["improvement_suggestions"]
 
     return JSONResponse(status_code=200,
-                        content={"reviews": reviews_list,
-                                 "metrics": metrics,
+                        content={"metrics": metrics,
                                  "improvement_suggestions": improvement_suggestions
                                  })
 
