@@ -1,5 +1,4 @@
 import json
-import traceback
 import uvicorn
 
 from pydantic import BaseModel
@@ -9,7 +8,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse, FileResponse
 
 from service.connectors.mongodb_connector import MongoConnector
-from service.metric_inference import MetricInference
+from service.inferences.metric_inference import MetricInference
 from service.ml.review_fetcher import ReviewFetcher
 
 app = FastAPI()
