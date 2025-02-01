@@ -2,6 +2,8 @@ import json
 import traceback
 import uvicorn
 
+from pydantic import BaseModel
+
 from fastapi import Depends
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse, FileResponse
@@ -29,12 +31,17 @@ def validate_and_process_params(app_name: str, app_id: str):
     return app_name.lower(), app_id
 
 
+class ReviewParams(BaseModel):
+    app_name: str
+    app_id: str
+
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc: Exception):
     return JSONResponse(
         status_code=500,
         content={"message": "Something went wrong",
-                 "exception": traceback.format_exc(),
+                 "exception": str(exc),
                  },
     )
 
@@ -44,7 +51,7 @@ async def http_exception_handler(request, exc: HTTPException):
     return JSONResponse(
         status_code=exc.status_code,
         content={"message": exc.detail,
-                 "exception": traceback.format_exc()},
+                 "exception": str(exc)},
     )
 
 
@@ -56,11 +63,14 @@ async def test():
 
 @app.post("/get_reviews")
 async def get_reviews(
-        params: tuple = Depends(validate_and_process_params),
+        params: ReviewParams,
         mongodb_connector: MongoConnector = Depends(get_mongo_connector)):
-    app_name, app_id = params
+
+    app_name, app_id = params.app_name.lower(), params.app_id
 
     reviews = ReviewFetcher.fetch_reviews(app_name=app_name, app_id=app_id)
+    if not reviews:
+        raise HTTPException(status_code=404, detail="Reviews not found. Please check the app name and app id is correct.")
     mongodb_connector.add_or_update_data(reviews)
     return JSONResponse(status_code=200,
                         content={"message": "Reviews fetched successfully."})

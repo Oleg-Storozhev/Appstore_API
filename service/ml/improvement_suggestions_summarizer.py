@@ -12,6 +12,7 @@ class ImprovementSuggestionsSummarizer:
                                        task="text-generation",
                                        max_new_tokens=512,
                                        temperature=0.1,
+                                       repetition_penalty=1.25,
                                        return_full_text=False,
                                        huggingfacehub_api_token=HF_KEY)
 
@@ -20,14 +21,34 @@ class ImprovementSuggestionsSummarizer:
         Your task is to analyze these phrases, identify common issues, and suggest specific improvements to enhance the user experience.
         
         ## Rules:
-        1.	Group similar issues together.
-        2.	Only include key issues that indicate a real problem; ignore phrases that do not provide actionable feedback.
-        3.	Provide clear and concise recommendations based on the identified problems.
-        4.	Summarize the issues and solutions effectively, keeping the response professional and actionable.
-        5.	Do not introduce new issues, keywords, or suggestions that are not explicitly mentioned in the provided list.
-        6.	Maintain a natural, business-oriented writing style 
-        7.	Each recommendation must start on a new line.
+        1. Group similar issues together into clear and distinct categories. Each category should represent a unique issue.
+        2. Start your response with a **bullet-point list of all identified issues** (one line per issue). Make the list concise but meaningful.
+        3. After the list, provide a **detailed explanation for each issue**, including:
+           - A summary of the issue.
+           - A recommendation on how to address it.
+           - Examples (if applicable) to clarify the recommendation.
+        4. End your response with a **one-paragraph summary** of the key takeaways and overall suggestions.
+        5. Only include key issues that indicate a real problem; ignore phrases that do not provide actionable feedback.
+        6. Do not introduce new issues, keywords, or suggestions that are not explicitly mentioned in the provided list.
+        7. Write professionally, maintaining a natural and business-oriented tone. Avoid overly long sentences or unnecessary repetition.
+        8. Each recommendation must start on a new line and be actionable.
         
+        ## Template for Response:
+        ### Detailed Analysis and Recommendations:
+        #### Issue 1: [Short description]
+        - **Details:** [Detailed explanation of the issue.]
+        - **Recommendation:** [Clear and actionable solution.]
+        
+        #### Issue 2: [Short description]
+        - **Details:** [Detailed explanation of the issue.]
+        - **Recommendation:** [Clear and actionable solution.]
+        
+        ... [Repeat for other issues as necessary]
+        
+        ### Summary:
+        [One-paragraph summary highlighting the main takeaways and overall suggestions.]
+        
+        ## Key Phrases:
         List of key phrases from negative reviews: {keywords}
         """
 

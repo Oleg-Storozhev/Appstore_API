@@ -15,7 +15,7 @@ class ReviewFetcher:
             reviews = app.reviews
             if not reviews:
                 logger.error(f"No reviews found for app_name={app_name}, app_id={app_id}, country={country}.")
-                raise HTTPException(status_code=404, detail="Reviews not found in the database.")
+                return {}
 
             processed_reviews = []
             for review in reviews:
