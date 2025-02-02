@@ -18,7 +18,11 @@ To set up and run the API and its associated Streamlit app locally on your machi
    git clone https://github.com/Oleg-Storozhev/Appstore_API.git
    ```
 
-2. **Install Dependencies**:  
+2. **Install Dependencies**:
+   First of all, type: 
+   ```bash
+   pip install app-store-scraper==0.3.5 --no-deps
+   ```
    Install all required Python packages listed in `requirements.txt` using pip:
    ```bash
    pip install -r requirements.txt
