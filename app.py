@@ -27,7 +27,8 @@ def validate_and_process_params(app_name: str, app_id: str):
         raise HTTPException(status_code=400, detail="The 'app_name' parameter is required.")
     if not app_id:
         raise HTTPException(status_code=400, detail="The 'app_id' parameter is required.")
-    return app_name.lower(), app_id
+    app_name = app_name.replace(" ", "_").replace("-", "_").lower()
+    return app_name, app_id
 
 
 class ReviewParams(BaseModel):

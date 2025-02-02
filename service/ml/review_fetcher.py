@@ -30,6 +30,7 @@ class ReviewFetcher:
                 review["cleaned_text"] = TextPreprocessor.clean_text(title_and_review)
                 review["sentiment"] = SentimentAnalyzer.get_sentiment(review["cleaned_text"])
 
+            app_name = app_name.replace(" ", "_").replace("-", "_").lower()
             review_dict = {"app_id": app_id, "app_name": app_name, "reviews": processed_reviews}
             return review_dict
 

@@ -15,8 +15,7 @@ To set up and run the API and its associated Streamlit app locally on your machi
 ### Steps to Run the API
 1. **Clone the Repository**:
    ```bash
-   git clone <your-repo-url>
-   cd <your-repo-directory>
+   git clone https://github.com/Oleg-Storozhev/Appstore_API.git
    ```
 
 2. **Install Dependencies**:  
@@ -31,7 +30,7 @@ To set up and run the API and its associated Streamlit app locally on your machi
 4. **Run the API**:  
    Start the API using Uvicorn:
    ```bash
-   uvicorn main:app --host 127.0.0.1 --port 8001
+   uvicorn app:app --host 127.0.0.1 --port 8001
    ```
 
 5. **Access the API**:
